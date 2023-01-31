@@ -1,5 +1,5 @@
 // import types from graphql
-const { GraphQLList } = require('graphql');
+const { GraphQLList, GraphQLID } = require('graphql');
 
 // Import  our own created type
 const { UserType } = require('./types');
@@ -10,12 +10,24 @@ const { User } = require('../models');
 
 const users = {
     type: new GraphQLList(UserType),
-    descrption: 'Get all users from the db',
+    description: 'Get all users from the db',
     resolve(parents, args){
         return User.find()
     }
 }
 
+const user = {
+    type: UserType,
+    description: 'Query single user from db by ID',
+    args: {
+        id: {type: GraphQLID}
+    },
+    resolve(parents, args){
+        return User.findById(args.id)
+    }
+}
+
 module.exports = {
-    users
+    users,
+    user
 }
