@@ -8,14 +8,14 @@ const register = {
     type: GraphQLString,
     description: 'Register a new user',
     args: {
-        username: {type: GraphQLString },
+        username: { type: GraphQLString },
         email: { type: GraphQLString },
         password: { type: GraphQLString }
     },
     async resolve(parent, args){
-        const checkUser = await User.findOne({email: args.email })
+        const checkUser = await User.findOne({ email: args.email })
         if (checkUser){
-            throw new Error("User with this email already exists")
+            throw new Error("User with this email address already exists")
         }
 
         const { username, email, password } = args;
@@ -32,29 +32,31 @@ const register = {
     }
 }
 
+
 const login = {
     type: GraphQLString,
-    description: 'Login User',
+    description: "Log a user in with email and password",
     args: {
-        username: {type: GraphQLString },
+        email: { type: GraphQLString },
         password: { type: GraphQLString }
     },
     async resolve(parent, args){
-        // Get user from database on the email
-        const user = await User.findOne({email: args.email })
-        // get the hashed password from user or set to an empty string if no user
+        // Get user from database based on the email
+        const user = await User.findOne({ email: args.email })
+        // Get the hashed password from the user or set it to an empty string if no user
         const hashedPassword = user?.password || ""
-        // returns bool if the passwords match
-        const correctPassword = await bcrypt.compare(args.password, user?.password || '');
-        // if no user or bad passeord
+        // returns a boolean if the passwords match
+        const correctPassword = await bcrypt.compare(args.password, hashedPassword);
+        // if no user or bad password
         if (!user || !correctPassword){
-            throw new Error("Invalid Credentials")
+            throw new Error('Invalid Credentials')
         }
-        // credential our user via token
+        // credential our used via token
         const token = createJwtToken(user);
         return token
     }
 }
+
 
 module.exports = {
     register,

@@ -1,31 +1,27 @@
 const jwt = require('jsonwebtoken');
-
 const unprotectedRoutes = [
     "/auth/register",
     "/auth/login",
-    "/graphql",
+    "/graphql"
 ];
 
 
 const authenticate = async (req, res, next) => {
-    console.log(req.cookies);
-
     
     try {
         const token = req.cookies?.jwtToken || ""
-        console.log(token)
         const verified = jwt.verify(token, process.env.JWT_SECRET);
         req.verifiedUser = verified.user;
         next()
     } catch(err){
         console.log(err);
-
-        if (unprotectedRoutes.includes(req.path)) {
-            next()
+        if (unprotectedRoutes.includes(req.path)){
+            next();
         } else {
             res.redirect("/auth/login");
         };
     }
+
 };
 
-module.exports = { authenticate };
+module.exports = { authenticate }
