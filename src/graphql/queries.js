@@ -11,7 +11,7 @@ const { User } = require('../models');
 const users = {
     type: new GraphQLList(UserType),
     description: 'Get all users from the db',
-    resolve(parents, args){
+    resolve(parent, args){
         return User.find()
     }
 }
@@ -22,7 +22,7 @@ const user = {
     args: {
         id: {type: GraphQLID}
     },
-    resolve(parents, args){
+    resolve(parent, args){
         return User.findById(args.id)
     }
 }
