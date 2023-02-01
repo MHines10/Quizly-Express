@@ -40,13 +40,23 @@ const login = {
         password: { type: GraphQLString }
     },
     async resolve(parent, args){
-        const checkUser = await User.findOne({email: args.email })
-        if (checkUser){
-            throw new Error("")
+        // Get user from database on the email
+        const user = await User.findOne({email: args.email })
+        // get the hashed password from user or set to an empty string if no user
+        const hashedPassword = user?.password || ""
+        // returns bool if the passwords match
+        const correctPassword = await bcrypt.compare(args.password, user?.password || '');
+        // if no user or bad passeord
+        if (!user || !correctPassword){
+            throw new Error("Invalid Credentials")
         }
+        // credential our user via token
+        const token = createJwtToken(user);
+        return token
     }
 }
 
 module.exports = {
-    register
+    register,
+    login
 }

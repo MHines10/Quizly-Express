@@ -1,4 +1,3 @@
-
 const axios = require('axios');
 
 module.exports = async (req, res) => {
@@ -14,9 +13,9 @@ module.exports = async (req, res) => {
             }
             `
 
-            const { data } = await axios.post(process.env.GRAPQL_ENDPOINT, 
+            const { data } = await axios.post(process.env.GRAPHQL_ENDPOINT, 
                     {
-                        query: mutations,
+                        query: mutation,
                         variables: {
                             email: req.body.email,
                             username: req.body.username,
@@ -31,10 +30,13 @@ module.exports = async (req, res) => {
                 )
 
             const jwtToken = data.data.register
+            console.log(jwtToken);
+            res.cookie('jwtToken', jwtToken, { httpOnly: true });
 
             res.redirect('/')
 
             } catch(err) {
+                console.log(err)
                 res.redirect('/auth/register');
             }
         }
