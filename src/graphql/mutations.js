@@ -1,7 +1,8 @@
-const { GraphQLString, GraphQLID } = require('graphql');
-const { User, Quiz } = require('../models');
+const { GraphQLString, GraphQLID, GraphQLList, GraphQLNonNull } = require('graphql');
+const { User, Quiz, Question } = require('../models');
 const bcrypt = require('bcrypt');
 const { createJwtToken } = require('../util/auth');
+const { QuestionInputType } = require('./types');
 
 
 const register = {
@@ -57,28 +58,30 @@ const login = {
     }
 }
 
+
 const createQuiz = {
     type: GraphQLString,
-    description: 'Create a quiz',
+    description: "Creates a new quiz with questions",
     args: {
-        title: {type: GraphQLString },
-        description: {type: GraphQLString },
-        userId: {type: GraphQLID }
+        title: { type: GraphQLString },
+        description: { type: GraphQLString },
+        userId: { type: GraphQLID },
+        questions: { type: new GraphQLNonNull(new GraphQLList(QuestionInputType)) }
     },
     async resolve(parent, args){
         // Generate a slug for our quiz based on the title
         let slugify = args.title.toLowerCase().replace(/[^\w ]+/g, '').replace(/ +/g, '-');
         /*
-         add a random integer to the end of the slug, check that the slug doesnt exits
-         if it doesm generate a new slug number
+        Add a random integer to the end of the slug, check that the slug does not already exist
+        if it does, generate a new slug number
         */
         let fullSlug;
         let existingQuiz;
-        do{
+        do {
             let slugId = Math.floor(Math.random() * 10000);
             fullSlug = `${slugify}-${slugId}`;
 
-            const existingQuiz = await Quiz.findOne({slug: fullSlug});
+            existingQuiz = await Quiz.findOne({ slug: fullSlug });
         } while (existingQuiz);
 
         const quiz = new Quiz({
@@ -90,6 +93,19 @@ const createQuiz = {
 
         quiz.save();
 
+        // Loop through all of the QuestionInputs 
+        for (let question of args.questions){
+            // Create new Question Instance with questionInput data and quiz id from recently created quiz
+            const newQuestion = new Question({
+                title: question.title,
+                correctAnswer: question.correctAnswer,
+                order: question.order,
+                quizId: quiz.id
+            })
+            // Save to the database
+            newQuestion.save()
+        }
+
         return quiz.slug
     }
 }
@@ -98,5 +114,5 @@ const createQuiz = {
 module.exports = {
     register,
     login,
-    createQuiz
+    createQuiz,
 }
