@@ -38,13 +38,13 @@ app.use(authenticate);
 
 //Add userData middleware which will add quzzzes to the req.verifiedUser Object
 // *Must be after Authenticate
-app.use(userData)
+app.use(userData);
 
 // add graphql middleware to app
 app.use('/graphql', graphqlHTTP({
     schema,
     graphiql: true
-}))
+}));
 
 app.set('view engine', 'ejs')
 
