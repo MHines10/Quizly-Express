@@ -1,5 +1,5 @@
-const { GraphQLString } = require('graphql');
-const { User } = require('../models');
+const { GraphQLString, GraphQLID } = require('graphql');
+const { User, Quiz } = require('../models');
 const bcrypt = require('bcrypt');
 const { createJwtToken } = require('../util/auth');
 
@@ -57,8 +57,46 @@ const login = {
     }
 }
 
+const createQuiz = {
+    type: GraphQLString,
+    description: 'Create a quiz',
+    args: {
+        title: {type: GraphQLString },
+        description: {type: GraphQLString },
+        userId: {type: GraphQLID }
+    },
+    async resolve(parent, args){
+        // Generate a slug for our quiz based on the title
+        let slugify = args.title.toLowerCase().replace(/[^\w ]+/g, '').replace(/ +/g, '-');
+        /*
+         add a random integer to the end of the slug, check that the slug doesnt exits
+         if it doesm generate a new slug number
+        */
+        let fullSlug;
+        let existingQuiz;
+        do{
+            let slugId = Math.floor(Math.random() * 10000);
+            fullSlug = `${slugify}-${slugId}`;
+
+            const existingQuiz = await Quiz.findOne({slug: fullSlug});
+        } while (existingQuiz);
+
+        const quiz = new Quiz({
+            title: args.title,
+            slug: fullSlug,
+            description: args.description,
+            userId: args.userId
+        })
+
+        quiz.save();
+
+        return quiz.slug
+    }
+}
+
 
 module.exports = {
     register,
-    login
+    login,
+    createQuiz
 }
