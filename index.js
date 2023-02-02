@@ -49,11 +49,7 @@ app.set('views', path.join(__dirname, 'src/templates/views'))
 // setup middleware to parse form data and add to request
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
-
-// impor tthe function from routes module
+// import the function from routes module
 const initRoutes = require('./src/routes');
 
 // Execute the function with app as argumwnt
