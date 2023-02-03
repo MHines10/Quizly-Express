@@ -5,9 +5,14 @@ QuizDashboardRouter.route('/create')
     .get(require('./editor'))
     .post(require('./create'))
 
-// slug after mains
+
+QuizDashboardRouter.route('/results/:id')
+    .get(require('./results'))
+
+
 QuizDashboardRouter.route('/:slug')
     .get(require('./view'))
+    .post(require('./submit'))
 
 
 module.exports = QuizDashboardRouter;
